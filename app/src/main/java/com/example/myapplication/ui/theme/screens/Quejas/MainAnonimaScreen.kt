@@ -1,5 +1,7 @@
+// Este es el paquete donde está mi pantalla principal para usuarios anónimos
 package com.example.myapplication.ui.theme.screens.Quejas
 
+// Importo todas las librerías necesarias para la interfaz
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,20 +27,22 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.myapplication.R
 
+// Pantalla principal para usuarios anónimos
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainAnonimaScreen(navController: NavHostController) {
-    // Definir colores basados en el tema
+    // Defino los colores según el tema (oscuro/claro)
     val isDarkTheme = isSystemInDarkTheme()
     val backgroundColor = if (isDarkTheme) Color(0xFF1A1A1A) else Color(0xFF2A2A2A)
     val menuItemColor = if (isDarkTheme) Color(0xFF2A2A2A) else Color(0xFF333333)
     val textColor = Color.White
-    val accentColor = Color(0xFF1E3A8A)
+    val accentColor = Color(0xFF1E3A8A)  // Azul oscuro para acentos
 
+    // Contenedor principal
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Imagen de fondo
+        // Imagen de fondo con efecto blur
         Image(
             painter = painterResource(id = R.drawable.chetumal),
             contentDescription = null,
@@ -48,6 +52,7 @@ fun MainAnonimaScreen(navController: NavHostController) {
             contentScale = ContentScale.Crop
         )
 
+        // Capa oscura sobre la imagen para mejorar legibilidad
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -61,13 +66,14 @@ fun MainAnonimaScreen(navController: NavHostController) {
                 )
         )
 
+        // Contenido principal
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo y título en la misma línea
+            // Cabecera con logo y título en la misma línea
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -75,7 +81,7 @@ fun MainAnonimaScreen(navController: NavHostController) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Título
+                // Título principal
                 Text(
                     text = "Ayuda a Mejorar\ntu Comunidad",
                     style = MaterialTheme.typography.headlineMedium.copy(
@@ -85,7 +91,7 @@ fun MainAnonimaScreen(navController: NavHostController) {
                     modifier = Modifier.weight(1f)
                 )
 
-                // Logo
+                // Logo de la aplicación
                 Image(
                     painter = painterResource(id = R.drawable.ayudacomunidad),
                     contentDescription = "Logo",
@@ -98,7 +104,7 @@ fun MainAnonimaScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Subtítulo con fondo
+            // Subtítulo con fondo semitransparente
             Box(
                 modifier = Modifier
                     .background(
@@ -118,7 +124,7 @@ fun MainAnonimaScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botón de Seguimiento de Quejas
+            // Botón para ver seguimiento de quejas
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -148,11 +154,12 @@ fun MainAnonimaScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Lista de servicios
+            // Lista de servicios disponibles
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
+                // Lista de opciones con sus iconos correspondientes
                 val options = listOf(
                     Pair("Alumbrado", R.drawable.alumbrado),
                     Pair("Alcantarillado", R.drawable.alcantarillado),
@@ -175,24 +182,27 @@ fun MainAnonimaScreen(navController: NavHostController) {
     }
 }
 
+// Componente para mostrar cada servicio en la lista
 @Composable
 fun ServiceListItemAnonimo(
     title: String,
     iconRes: Int,
     onClick: () -> Unit
 ) {
+    // Colores adaptados según el tema
     val isDarkTheme = isSystemInDarkTheme()
     val cardBackgroundColor = if (isDarkTheme) {
-        Color.White.copy(alpha = 0.7f)
+        Color.White.copy(alpha = 0.7f)  // Fondo claro en tema oscuro
     } else {
-        Color(0xFF2A2A2A).copy(alpha = 0.9f)
+        Color(0xFF2A2A2A).copy(alpha = 0.9f)  // Fondo oscuro en tema claro
     }
     val titleColor = if (isDarkTheme) {
-        Color(0xFF1E3A8A)
+        Color(0xFF1E3A8A)  // Azul oscuro en tema oscuro
     } else {
-        Color.White
+        Color.White  // Blanco en tema claro
     }
 
+    // Tarjeta del servicio
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -209,7 +219,7 @@ fun ServiceListItemAnonimo(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            // Icono del servicio
+            // Icono del servicio con fondo circular
             Box(
                 modifier = Modifier
                     .size(80.dp)

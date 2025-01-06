@@ -1,5 +1,7 @@
+// Este es el paquete donde está mi pantalla de seguimiento de quejas
 package com.example.myapplication.ui.theme.screens.Usuario
 
+// Importo todas las librerías necesarias para la interfaz, PDF y notificaciones
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.ContentValues
@@ -38,9 +40,11 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
+// Esta es la pantalla principal de seguimiento de quejas
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SeguimientoQuejasUserScreen(navController: NavHostController, auth: FirebaseAuth) {
+    // Inicializo Firebase y variables de estado
     val db = FirebaseFirestore.getInstance()
     val currentUser = FirebaseAuth.getInstance().currentUser
     var quejasList by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
@@ -48,24 +52,27 @@ fun SeguimientoQuejasUserScreen(navController: NavHostController, auth: Firebase
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
 
-    // Cargar quejas cuando se inicia la pantalla
+    // Este efecto se ejecuta cuando se inicia la pantalla para cargar las quejas
     LaunchedEffect(Unit) {
         isLoading = true
         errorMessage = null
         try {
+            // Verifico que haya un usuario logueado
             val userEmail = currentUser?.email
             if (userEmail.isNullOrBlank()) {
                 errorMessage = "No se pudo recuperar el correo del usuario."
                 isLoading = false
                 return@LaunchedEffect
             }
+
+            // Lista de categorías de quejas disponibles
             val categorias = listOf("Alumbrado", "Alcantarillado", "Áreas Verdes", "Baches", "Banquetas")
 
-            // Lista mutable para almacenar todas las quejas
+            // Lista temporal para almacenar todas las quejas
             val allQuejasList = mutableListOf<Map<String, Any>>()
-            // Contador para controlar cuándo se han completado todas las consultas
             var completedQueries = 0
 
+            // Busco las quejas en cada categoría
             categorias.forEach { categoria ->
                 db.collection("quejas")
                     .document(categoria)
@@ -73,11 +80,11 @@ fun SeguimientoQuejasUserScreen(navController: NavHostController, auth: Firebase
                     .whereEqualTo("correo", userEmail)
                     .get()
                     .addOnSuccessListener { querySnapshot ->
-                        // Añadir cada documento a la lista
+                        // Proceso cada queja encontrada
                         querySnapshot.documents.forEach { document ->
                             val quejaData = document.data
                             if (quejaData != null) {
-                                // Añadir el ID del documento y la categoría al mapa de datos
+                                // Agrego el ID y la categoría a los datos
                                 allQuejasList.add(quejaData + mapOf(
                                     "id" to document.id,
                                     "categoria" to categoria
@@ -87,7 +94,7 @@ fun SeguimientoQuejasUserScreen(navController: NavHostController, auth: Firebase
 
                         completedQueries++
 
-                        // Cuando se han completado todas las consultas
+                        // Cuando termino de buscar en todas las categorías
                         if (completedQueries == categorias.size) {
                             quejasList = allQuejasList
                             isLoading = false
@@ -107,6 +114,7 @@ fun SeguimientoQuejasUserScreen(navController: NavHostController, auth: Firebase
         }
     }
 
+    // Contenedor principal
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -121,7 +129,7 @@ fun SeguimientoQuejasUserScreen(navController: NavHostController, auth: Firebase
                 .blur(radius = 3.dp)
         )
 
-        // Capa de oscurecimiento sobre la imagen
+        // Capa oscura para mejorar legibilidad
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -135,7 +143,9 @@ fun SeguimientoQuejasUserScreen(navController: NavHostController, auth: Firebase
                 )
         )
 
+        // Estructura principal de la pantalla
         Scaffold(
+            // Barra superior con título y botón de regresar
             topBar = {
                 TopAppBar(
                     title = {
@@ -168,7 +178,7 @@ fun SeguimientoQuejasUserScreen(navController: NavHostController, auth: Firebase
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Logo
+                // Logo de la aplicación
                 Image(
                     painter = painterResource(id = R.drawable.ayudacomunidad),
                     contentDescription = "Logo",
@@ -177,6 +187,7 @@ fun SeguimientoQuejasUserScreen(navController: NavHostController, auth: Firebase
                         .padding(vertical = 16.dp)
                 )
 
+                // Título principal
                 Text(
                     text = "Ayuda a Mejorar tu Comunidad",
                     style = MaterialTheme.typography.headlineMedium.copy(
@@ -188,12 +199,15 @@ fun SeguimientoQuejasUserScreen(navController: NavHostController, auth: Firebase
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Manejo diferentes estados de la pantalla
                 when {
+                    // Mostrar indicador de carga
                     isLoading -> {
                         CircularProgressIndicator(
                             color = Color.White
                         )
                     }
+                    // Mostrar mensaje de error si hay alguno
                     errorMessage != null -> {
                         Text(
                             text = errorMessage ?: "",
@@ -202,6 +216,7 @@ fun SeguimientoQuejasUserScreen(navController: NavHostController, auth: Firebase
                             textAlign = TextAlign.Center
                         )
                     }
+                    // Mostrar mensaje si no hay quejas
                     quejasList.isEmpty() -> {
                         Text(
                             text = "No tienes quejas registradas",
@@ -210,6 +225,7 @@ fun SeguimientoQuejasUserScreen(navController: NavHostController, auth: Firebase
                             textAlign = TextAlign.Center
                         )
                     }
+                    // Mostrar lista de quejas
                     else -> {
                         Text(
                             text = "Tus Quejas Registradas",
@@ -221,6 +237,7 @@ fun SeguimientoQuejasUserScreen(navController: NavHostController, auth: Firebase
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
 
+                        // Lista scrolleable de quejas
                         LazyColumn(
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
@@ -241,6 +258,7 @@ fun SeguimientoQuejasUserScreen(navController: NavHostController, auth: Firebase
     }
 }
 
+// Componente para mostrar cada queja en una tarjeta
 @Composable
 fun QuejaCard(queja: Map<String, Any>, onDownloadClick: () -> Unit) {
     Card(
@@ -256,6 +274,7 @@ fun QuejaCard(queja: Map<String, Any>, onDownloadClick: () -> Unit) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
+            // Tipo de queja
             Text(
                 text = "Tipo: ${queja["tipo"] ?: "N/A"}",
                 style = MaterialTheme.typography.titleLarge.copy(
@@ -264,6 +283,8 @@ fun QuejaCard(queja: Map<String, Any>, onDownloadClick: () -> Unit) {
                 )
             )
             Spacer(modifier = Modifier.height(8.dp))
+
+            // Detalles de la queja
             Text(
                 text = "Motivo: ${queja["motivoQueja"] ?: "N/A"}",
                 style = MaterialTheme.typography.bodyLarge.copy(
@@ -276,6 +297,8 @@ fun QuejaCard(queja: Map<String, Any>, onDownloadClick: () -> Unit) {
                     color = Color.White.copy(alpha = 0.7f)
                 )
             )
+
+            // Estado de la queja con colores diferentes según el estado
             Text(
                 text = "Estado: ${queja["estado"] ?: "Pendiente"}",
                 style = MaterialTheme.typography.bodyMedium,
@@ -288,6 +311,7 @@ fun QuejaCard(queja: Map<String, Any>, onDownloadClick: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Botón para descargar PDF
             Button(
                 onClick = onDownloadClick,
                 modifier = Modifier.fillMaxWidth(),
@@ -308,8 +332,10 @@ fun QuejaCard(queja: Map<String, Any>, onDownloadClick: () -> Unit) {
     }
 }
 
+// Función para generar y guardar el PDF de la queja
 private fun generateAndSavePDF(context: Context, queja: Map<String, Any>) {
     try {
+        // Creo el documento PDF
         val pdfDocument = PdfDocument()
         val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
         val page = pdfDocument.startPage(pageInfo)
@@ -319,12 +345,12 @@ private fun generateAndSavePDF(context: Context, queja: Map<String, Any>) {
             color = android.graphics.Color.BLACK
         }
 
-        // Título
+        // Título del PDF
         paint.textSize = 20f
         canvas.drawText("Reporte de Queja", 50f, 50f, paint)
         paint.textSize = 12f
 
-        // Contenido
+        // Agrego el contenido al PDF
         var y = 100f
         canvas.drawText("Tipo: ${queja["tipo"] ?: "N/A"}", 50f, y, paint)
         y += 20f
@@ -338,10 +364,12 @@ private fun generateAndSavePDF(context: Context, queja: Map<String, Any>) {
 
         pdfDocument.finishPage(page)
 
-        // Guardar el PDF
+        // Genero un nombre único para el archivo
         val fileName = "Queja_${System.currentTimeMillis()}.pdf"
 
+        // Guardo el PDF según la versión de Android
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Para Android 10 y superior
             val contentValues = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
                 put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
@@ -355,6 +383,7 @@ private fun generateAndSavePDF(context: Context, queja: Map<String, Any>) {
                 }
             }
         } else {
+            // Para versiones anteriores de Android
             val filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
             val file = java.io.File(filePath, fileName)
             pdfDocument.writeTo(java.io.FileOutputStream(file))
@@ -369,10 +398,12 @@ private fun generateAndSavePDF(context: Context, queja: Map<String, Any>) {
     }
 }
 
+// Función para mostrar una notificación cuando se descarga el PDF
 private fun showNotification(context: Context, fileName: String) {
     val channelId = "pdf_download_channel"
     val notificationId = 1001
 
+// Creo el canal de notificación para Android 8.0 y superior
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val channel = NotificationChannel(
             channelId,
@@ -382,17 +413,20 @@ private fun showNotification(context: Context, fileName: String) {
             description = "Notificaciones de PDFs descargados"
         }
 
+        // Registro el canal en el sistema
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }
 
+    // Configuro cómo se verá la notificación
     val builder = NotificationCompat.Builder(context, channelId)
-        .setSmallIcon(android.R.drawable.stat_sys_download_done)
-        .setContentTitle("PDF Descargado")
-        .setContentText("Se ha guardado el archivo: $fileName")
-        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        .setAutoCancel(true)
+        .setSmallIcon(android.R.drawable.stat_sys_download_done)  // Icono de descarga completada
+        .setContentTitle("PDF Descargado")  // Título de la notificación
+        .setContentText("Se ha guardado el archivo: $fileName")  // Mensaje de la notificación
+        .setPriority(NotificationCompat.PRIORITY_DEFAULT)  // Prioridad normal
+        .setAutoCancel(true)  // Se cierra al tocarla
 
+    // Muestro la notificación
     with(NotificationManagerCompat.from(context)) {
         notify(notificationId, builder.build())
     }

@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.theme.screens.Admin
 
+// Importación de los paquetes y componentes necesarios
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -29,16 +30,24 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import com.example.myapplication.R
 
+// Anotación para indicar el uso de APIs experimentales de Material3
 @OptIn(ExperimentalMaterial3Api::class)
+// Función composable principal para la pantalla de administración de usuarios
 @Composable
 fun UsuariosAdminScreen(navController: NavHostController) {
+    // Obtención de una instancia de FirebaseFirestore
     val db = FirebaseFirestore.getInstance()
+
+    // Variables de estado para almacenar los datos de los usuarios, el estado de carga y mensajes de error
     var users by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    // Variables de estado para controlar el diálogo de edición de usuario
     var showEditDialog by remember { mutableStateOf(false) }
     var selectedUser by remember { mutableStateOf<Map<String, Any>?>(null) }
 
+    // Efecto de lanzamiento para obtener los datos de los usuarios desde Firestore
     LaunchedEffect(Unit) {
         try {
             val snapshot = db.collection("usuarios").get().await()
@@ -50,9 +59,11 @@ fun UsuariosAdminScreen(navController: NavHostController) {
         }
     }
 
+    // Contenedor principal de la pantalla
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
+        // Imagen de fondo con efecto de desenfoque
         Image(
             painter = painterResource(id = R.drawable.chetumal),
             contentDescription = null,
@@ -62,6 +73,7 @@ fun UsuariosAdminScreen(navController: NavHostController) {
             contentScale = ContentScale.Crop
         )
 
+        // Capa de gradiente para oscurecer la imagen de fondo
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -75,11 +87,13 @@ fun UsuariosAdminScreen(navController: NavHostController) {
                 )
         )
 
+        // Columna principal que contiene el contenido de la pantalla
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            // Fila con el botón de volver y el título de la pantalla
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -103,6 +117,7 @@ fun UsuariosAdminScreen(navController: NavHostController) {
                 )
             }
 
+            // Caja con fondo para el título de la lista de usuarios
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -122,8 +137,10 @@ fun UsuariosAdminScreen(navController: NavHostController) {
                 )
             }
 
+            // Espacio vertical de 16dp
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Muestra diferentes estados según la carga de datos y la lista de usuarios
             when {
                 isLoading -> CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -143,14 +160,17 @@ fun UsuariosAdminScreen(navController: NavHostController) {
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    // Itera sobre la lista de usuarios y muestra una tarjeta para cada uno
                     items(users) { user ->
                         UserCard(
                             user = user,
                             onDelete = { userId ->
+                                // Elimina el usuario de Firestore y actualiza la lista de usuarios
                                 db.collection("usuarios").document(userId).delete()
                                 users = users.filterNot { it["id"] == userId }
                             },
                             onEdit = { selected ->
+                                // Establece el usuario seleccionado y muestra el diálogo de edición
                                 selectedUser = selected
                                 showEditDialog = true
                             }
@@ -161,35 +181,41 @@ fun UsuariosAdminScreen(navController: NavHostController) {
         }
     }
 
+    // Muestra el diálogo de edición de usuario si está seleccionado y se debe mostrar
     if (showEditDialog && selectedUser != null) {
         EditUserDialog(
             user = selectedUser!!,
             onSave = { updatedUser ->
                 val userId = updatedUser["id"].toString()
+                // Actualiza los datos del usuario en Firestore y en la lista de usuarios
                 db.collection("usuarios").document(userId).update(updatedUser)
                 users = users.map { if (it["id"] == userId) updatedUser else it }
+                // Oculta el diálogo de edición y limpia el usuario seleccionado
                 showEditDialog = false
                 selectedUser = null
             },
             onDismiss = {
+                // Oculta el diálogo de edición y limpia el usuario seleccionado al descartar el diálogo
                 showEditDialog = false
                 selectedUser = null
             }
         )
     }
 }
-
+// Composable que representa una tarjeta de usuario
 @Composable
 fun UserCard(
     user: Map<String, Any>,
     onDelete: (String) -> Unit,
     onEdit: (Map<String, Any>) -> Unit
 ) {
+    // Obtiene los datos del usuario del mapa proporcionado
     val nombre = user["nombre"]?.toString() ?: "Sin nombre"
     val correo = user["correoElectronico"]?.toString() ?: "null"
     val telefono = user["numeroTelefonico"]?.toString() ?: "No disponible"
     val userId = user["id"]?.toString() ?: ""
 
+    // Tarjeta que muestra los detalles del usuario
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -203,6 +229,7 @@ fun UserCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
+            // Muestra el nombre del usuario
             Text(
                 text = "Usuario: $nombre",
                 style = MaterialTheme.typography.titleMedium.copy(
@@ -211,12 +238,14 @@ fun UserCard(
                 )
             )
             Spacer(modifier = Modifier.height(8.dp))
+            // Muestra el correo electrónico del usuario
             Text(
                 text = "Correo: $correo",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = Color(0xFF333333)
                 )
             )
+            // Muestra el número de teléfono del usuario
             Text(
                 text = "Teléfono: $telefono",
                 style = MaterialTheme.typography.bodyMedium.copy(
@@ -226,6 +255,7 @@ fun UserCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Fila con botones de editar y eliminar usuario
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
@@ -254,17 +284,20 @@ fun UserCard(
     }
 }
 
+// Composable que representa un diálogo de edición de usuario
 @Composable
 fun EditUserDialog(
     user: Map<String, Any>,
     onSave: (Map<String, Any>) -> Unit,
     onDismiss: () -> Unit
 ) {
+    // Variables de estado para los campos de edición
     var nombre by remember { mutableStateOf(user["nombre"]?.toString() ?: "") }
     var correo by remember { mutableStateOf(user["correoElectronico"]?.toString() ?: "") }
     var telefono by remember { mutableStateOf(user["numeroTelefonico"]?.toString() ?: "") }
     val isDarkTheme = isSystemInDarkTheme()
 
+    // Colores personalizados para los campos de texto según el tema
     val textFieldColors = OutlinedTextFieldDefaults.colors(
         focusedBorderColor = Color(0xFF1E3A8A),
         unfocusedBorderColor = if (isDarkTheme) Color.White.copy(alpha = 0.5f) else Color.Black.copy(alpha = 0.5f),
@@ -275,6 +308,7 @@ fun EditUserDialog(
         cursorColor = if (isDarkTheme) Color.White else Color(0xFF1E3A8A)
     )
 
+    // Diálogo de edición de usuario
     Dialog(onDismissRequest = onDismiss) {
         Card(
             shape = RoundedCornerShape(16.dp),
@@ -287,6 +321,7 @@ fun EditUserDialog(
                 modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Título del diálogo
                 Text(
                     "Editar Usuario",
                     style = MaterialTheme.typography.titleLarge.copy(
@@ -295,6 +330,7 @@ fun EditUserDialog(
                     )
                 )
 
+                // Campo de texto para el nombre
                 OutlinedTextField(
                     value = nombre,
                     onValueChange = { nombre = it },
@@ -303,6 +339,7 @@ fun EditUserDialog(
                     colors = textFieldColors
                 )
 
+                // Campo de texto para el correo electrónico
                 OutlinedTextField(
                     value = correo,
                     onValueChange = { correo = it },
@@ -311,6 +348,7 @@ fun EditUserDialog(
                     colors = textFieldColors
                 )
 
+                // Campo de texto para el número de teléfono
                 OutlinedTextField(
                     value = telefono,
                     onValueChange = { telefono = it },
@@ -319,6 +357,7 @@ fun EditUserDialog(
                     colors = textFieldColors
                 )
 
+                // Fila con botones de cancelar y guardar
                 Row(
                     horizontalArrangement = Arrangement.End,
                     modifier = Modifier.fillMaxWidth()
@@ -331,6 +370,7 @@ fun EditUserDialog(
                     }
                     Button(
                         onClick = {
+                            // Crea un mapa mutable con los datos actualizados del usuario
                             val updatedUser = user.toMutableMap().apply {
                                 put("nombre", nombre)
                                 put("correoElectronico", correo)

@@ -15,17 +15,21 @@ import com.google.firebase.auth.FirebaseAuth
 import com.example.myapplication.ui.theme.screens.Quejas.MainAnonimaScreen
 import com.example.myapplication.ui.theme.screens.admin.QuejasAdminScreen
 
+// Este objeto contiene todas las rutas de navegación de mi app
+// Lo uso para evitar errores de escritura en las rutas y tenerlas centralizadas
 object NavigationRoutes {
     const val INICIO = "inicio"
     const val LOGIN = "login"
     const val MAIN = "main"
     const val MAIN_ANONIMA = "main_anonima"
+    // Esta ruta tiene un parámetro 'tipo' que uso para saber qué tipo de queja es
     const val QUEJAS_ANONIMAS = "quejas_anonimas/{tipo}"
     const val QUEJAS = "quejas/{tipo}"
     const val CREAR_CUENTA = "crear_cuenta"
     const val ADMIN = "admin"
     const val MAIN_ADMIN = "main_admin"
     const val QUEJAS_ADMIN = "quejas_admin"
+    // Esta ruta tiene un parámetro 'servicio' para filtrar quejas por servicio
     const val ADMIN_VER_QUEJAS = "admin_ver_quejas/{servicio}"
     const val GESTIONAR_USUARIOS = "gestionar_usuarios"
     const val QUIENES_SOMOS = "quienes_somos"
@@ -33,13 +37,17 @@ object NavigationRoutes {
     const val SEGUIMIENTO_QUEJAS_ANONIMAS = "seguimiento_quejas_anonimas"
 }
 
+// Esta es mi función principal de navegación
+// Aquí defino todas las pantallas y cómo navegar entre ellas
 @Composable
 fun AppNavigation(navHostController: NavHostController, auth: FirebaseAuth) {
     NavHost(
         navController = navHostController,
+        // La app siempre empieza en la pantalla de inicio
         startDestination = NavigationRoutes.INICIO
     ) {
-        // Pantallas principales
+        // Pantallas principales de la app
+        // Cada composable representa una pantalla diferente
         composable(NavigationRoutes.INICIO) {
             InicioScreen(navHostController, auth)
         }
@@ -52,11 +60,14 @@ fun AppNavigation(navHostController: NavHostController, auth: FirebaseAuth) {
             MainScreen(navHostController, auth)
         }
 
-        // Pantallas para quejas anónimas
+        // Esta sección es para usuarios anónimos
+        // Pueden hacer quejas sin necesidad de registrarse
         composable(NavigationRoutes.MAIN_ANONIMA) {
             MainAnonimaScreen(navHostController)
         }
 
+        // Aquí configuro la navegación para quejas anónimas
+        // Uso argumentos para saber qué tipo de queja quieren hacer
         composable(
             route = NavigationRoutes.QUEJAS_ANONIMAS,
             arguments = listOf(navArgument("tipo") { type = androidx.navigation.NavType.StringType })
@@ -65,7 +76,8 @@ fun AppNavigation(navHostController: NavHostController, auth: FirebaseAuth) {
             QuejasAnonimasScreen(tipo = tipo, navController = navHostController)
         }
 
-        // Rutas para quejas registradas
+        // Esta sección es para usuarios registrados
+        // Pueden hacer quejas con su cuenta
         composable(
             route = NavigationRoutes.QUEJAS,
             arguments = listOf(navArgument("tipo") { type = androidx.navigation.NavType.StringType })
@@ -74,7 +86,7 @@ fun AppNavigation(navHostController: NavHostController, auth: FirebaseAuth) {
             QuejaScreen(tipo = tipo, navController = navHostController)
         }
 
-        // Pantallas de gestión de cuenta
+        // Pantallas relacionadas con la cuenta de usuario
         composable(NavigationRoutes.CREAR_CUENTA) {
             CreateAccountScreen(navHostController, auth)
         }
@@ -83,7 +95,8 @@ fun AppNavigation(navHostController: NavHostController, auth: FirebaseAuth) {
             SeguimientoQuejasUserScreen(navController = navHostController, auth = auth)
         }
 
-        // Pantallas de administración
+        // Esta sección es solo para administradores
+        // Aquí pueden gestionar quejas y usuarios
         composable(NavigationRoutes.ADMIN) {
             AdminScreen(navController = navHostController)
         }
@@ -104,7 +117,7 @@ fun AppNavigation(navHostController: NavHostController, auth: FirebaseAuth) {
             SeguimientoQuejasAnonimas(navController = navHostController)
         }
 
-        // Pantallas con argumentos dinámicos para administración
+        // Esta ruta es para que los admins vean quejas por servicio
         composable(
             route = NavigationRoutes.ADMIN_VER_QUEJAS,
             arguments = listOf(navArgument("servicio") { type = androidx.navigation.NavType.StringType })
@@ -113,7 +126,7 @@ fun AppNavigation(navHostController: NavHostController, auth: FirebaseAuth) {
             AdminViewQuejasScreen(navController = navHostController, servicio = servicio)
         }
 
-        // Pantallas informativas
+        // Pantalla informativa sobre la app
         composable(NavigationRoutes.QUIENES_SOMOS) {
             QuienesSomosScreen(navController = navHostController)
         }

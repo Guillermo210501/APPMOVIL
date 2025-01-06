@@ -1,5 +1,7 @@
+// Aquí defino el paquete de mi aplicación donde estará la pantalla de crear cuenta
 package com.example.myapplication.ui.theme.screens.Usuario
 
+// Importo todas las librerías necesarias para la interfaz y Firebase
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -23,8 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.input.*
 import androidx.navigation.NavHostController
 import com.example.myapplication.R
 import com.google.firebase.auth.FirebaseAuth
@@ -33,7 +34,12 @@ import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
 
+// Esta función maneja todo el proceso de crear una cuenta nueva en Firebase
 fun createAccount(
     auth: FirebaseAuth,
     firestore: FirebaseFirestore,
@@ -47,10 +53,13 @@ fun createAccount(
     onFailure: (String) -> Unit
 ) {
     try {
+        // Primero creo el usuario en Authentication con email y contraseña
         auth.createUserWithEmailAndPassword(correoElectronico, contraseña)
             .addOnSuccessListener { authResult ->
+                // Si se crea bien, obtengo el ID del usuario
                 val userId = authResult.user?.uid
                 if (userId != null) {
+                    // Creo un mapa con toda la información del usuario
                     val userData = hashMapOf(
                         "nombre" to nombre,
                         "apellidoPaterno" to apellidoPaterno,
@@ -60,6 +69,7 @@ fun createAccount(
                         "timestamp" to com.google.firebase.Timestamp.now()
                     )
 
+                    // Guardo los datos en Firestore en la colección "usuarios"
                     firestore.collection("usuarios")
                         .document(userId)
                         .set(userData)
@@ -74,6 +84,7 @@ fun createAccount(
                 }
             }
             .addOnFailureListener { e ->
+                // Manejo los diferentes tipos de errores que pueden ocurrir
                 when (e) {
                     is FirebaseAuthWeakPasswordException ->
                         onFailure("La contraseña debe tener al menos 6 caracteres")
@@ -89,6 +100,7 @@ fun createAccount(
     }
 }
 
+// Este componente es para mostrar mensajes de error en color rojo
 @Composable
 fun ErrorMessage(message: String) {
     Text(
@@ -99,9 +111,11 @@ fun ErrorMessage(message: String) {
     )
 }
 
+// Esta es la pantalla principal de crear cuenta
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
+    // Variables para guardar los datos del formulario
     var nombre by remember { mutableStateOf("") }
     var apellidoPaterno by remember { mutableStateOf("") }
     var apellidoMaterno by remember { mutableStateOf("") }
@@ -109,19 +123,27 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
     var correoElectronico by remember { mutableStateOf("") }
     var contraseña by remember { mutableStateOf("") }
     var confirmarContraseña by remember { mutableStateOf("") }
+
+    // Variables para controlar la visibilidad de las contraseñas
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isConfirmPasswordVisible by remember { mutableStateOf(false) }
+
+    // Variables para el estado de carga y errores
     var isLoading by remember { mutableStateOf(false) }
     var showError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
+
+    // Variables para el scroll y contexto
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val firestore = FirebaseFirestore.getInstance()
+    val focusManager = LocalFocusManager.current
 
+    // Contenedor principal
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Imagen de fondo con efecto blur
+        // Imagen de fondo con efecto blur para que se vea más estético
         Image(
             painter = painterResource(id = R.drawable.chetumal),
             contentDescription = "Fondo",
@@ -129,13 +151,14 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer {
+                    // Hago la imagen más grande para que cubra bien la pantalla
                     scaleX = 1.2f
                     scaleY = 1.2f
                 }
                 .blur(radius = 2.dp)
         )
 
-        // Capa de oscurecimiento
+        // Capa oscura para mejorar la legibilidad del texto
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -149,6 +172,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 )
         )
 
+        // Columna principal con todos los elementos del formulario
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -156,7 +180,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo sin fondo
+            // Logo de la aplicación
             Image(
                 painter = painterResource(id = R.drawable.ayudacomunidad),
                 contentDescription = "Logo de la aplicación",
@@ -165,7 +189,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                     .padding(bottom = 16.dp)
             )
 
-            // Título y subtítulo
+            // Título principal
             Text(
                 text = "Ayuda a Mejorar tu Comunidad",
                 style = MaterialTheme.typography.headlineMedium.copy(
@@ -175,6 +199,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 textAlign = TextAlign.Center
             )
 
+            // Subtítulo
             Text(
                 text = "La comunidad en tus manos, el cambio en tu voz",
                 style = MaterialTheme.typography.bodyLarge.copy(
@@ -184,10 +209,11 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            // Campos del formulario
+            // Campo de nombre - solo acepta letras
             OutlinedTextField(
                 value = nombre,
                 onValueChange = {
+                    // Validación para solo aceptar letras y espacios
                     if (it.all { char -> char.isLetter() || char.isWhitespace() }) {
                         nombre = it
                     }
@@ -196,6 +222,12 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                ),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.White.copy(alpha = 0.1f),
                     unfocusedContainerColor = Color.White.copy(alpha = 0.1f),
@@ -207,6 +239,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 shape = RoundedCornerShape(12.dp)
             )
 
+            // Campo de apellido paterno - solo acepta letras
             OutlinedTextField(
                 value = apellidoPaterno,
                 onValueChange = {
@@ -218,6 +251,12 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                ),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.White.copy(alpha = 0.1f),
                     unfocusedContainerColor = Color.White.copy(alpha = 0.1f),
@@ -229,6 +268,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 shape = RoundedCornerShape(12.dp)
             )
 
+            // Campo de apellido materno - solo acepta letras
             OutlinedTextField(
                 value = apellidoMaterno,
                 onValueChange = {
@@ -240,6 +280,12 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                ),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.White.copy(alpha = 0.1f),
                     unfocusedContainerColor = Color.White.copy(alpha = 0.1f),
@@ -251,6 +297,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 shape = RoundedCornerShape(12.dp)
             )
 
+            // Campo de número telefónico - solo acepta números y máximo 10 dígitos
             OutlinedTextField(
                 value = numeroTelefonico,
                 onValueChange = {
@@ -262,6 +309,13 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                ),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.White.copy(alpha = 0.1f),
                     unfocusedContainerColor = Color.White.copy(alpha = 0.1f),
@@ -273,6 +327,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 shape = RoundedCornerShape(12.dp)
             )
 
+            // Campo de correo electrónico
             OutlinedTextField(
                 value = correoElectronico,
                 onValueChange = { correoElectronico = it },
@@ -280,6 +335,13 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                ),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.White.copy(alpha = 0.1f),
                     unfocusedContainerColor = Color.White.copy(alpha = 0.1f),
@@ -290,7 +352,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 ),
                 shape = RoundedCornerShape(12.dp)
             )
-
+            // Campo de contraseña con opción de mostrar/ocultar
             OutlinedTextField(
                 value = contraseña,
                 onValueChange = { contraseña = it },
@@ -298,7 +360,16 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
+                // Esta parte hace que se muestre como contraseña (con puntos)
                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                ),
+                // Botón para mostrar/ocultar la contraseña
                 trailingIcon = {
                     IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                         Icon(
@@ -308,6 +379,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                         )
                     }
                 },
+                // Colores personalizados para que se vea bien sobre el fondo oscuro
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.White.copy(alpha = 0.1f),
                     unfocusedContainerColor = Color.White.copy(alpha = 0.1f),
@@ -319,6 +391,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 shape = RoundedCornerShape(12.dp)
             )
 
+            // Campo para confirmar contraseña
             OutlinedTextField(
                 value = confirmarContraseña,
                 onValueChange = { confirmarContraseña = it },
@@ -327,6 +400,16 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 visualTransformation = if (isConfirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
+                // Al presionar "Done" en el teclado, se cierra el teclado
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManager.clearFocus()
+                    }
+                ),
                 trailingIcon = {
                     IconButton(onClick = { isConfirmPasswordVisible = !isConfirmPasswordVisible }) {
                         Icon(
@@ -347,9 +430,10 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 shape = RoundedCornerShape(12.dp)
             )
 
-            // Botón de registro
+            // Botón de registro con estado de carga
             Button(
                 onClick = {
+                    // Verifico que todos los campos estén llenos antes de continuar
                     if (nombre.isBlank() || apellidoPaterno.isBlank() || apellidoMaterno.isBlank() ||
                         numeroTelefonico.isBlank() || correoElectronico.isBlank() || contraseña.isBlank()
                     ) {
@@ -357,6 +441,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                         return@Button
                     }
 
+                    // Activo el indicador de carga
                     isLoading = true
                     createAccount(
                         auth = auth,
@@ -368,6 +453,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                         correoElectronico = correoElectronico,
                         contraseña = contraseña,
                         onSuccess = {
+                            // Si todo sale bien, desactivo la carga y navego al login
                             isLoading = false
                             Toast.makeText(context, "Cuenta creada exitosamente", Toast.LENGTH_SHORT).show()
                             navController.navigate("login") {
@@ -375,6 +461,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                             }
                         },
                         onFailure = { error ->
+                            // Si hay error, lo muestro y desactivo la carga
                             isLoading = false
                             showError = true
                             errorMessage = error
@@ -382,6 +469,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                         }
                     )
                 },
+                // Diseño del botón - uso colores inversos para que destaque
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -391,6 +479,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 ),
                 enabled = !isLoading
             ) {
+                // Muestro un indicador de carga o el texto según el estado
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
@@ -403,7 +492,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Link para volver al login
+            // Botón para ir al login si ya tiene cuenta
             TextButton(
                 onClick = { navController.navigate("login") }
             ) {
@@ -413,6 +502,7 @@ fun CreateAccountScreen(navController: NavHostController, auth: FirebaseAuth) {
                 )
             }
 
+            // Muestro mensajes de error si hay alguno
             if (showError) {
                 ErrorMessage(errorMessage)
             }

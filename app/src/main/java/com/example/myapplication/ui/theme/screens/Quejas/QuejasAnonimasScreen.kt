@@ -1,5 +1,7 @@
+// Este es el paquete donde está mi pantalla de quejas anónimas
 package com.example.myapplication.ui.theme.screens.Quejas
 
+// Importo todas las librerías necesarias para la interfaz y manejo de datos
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -30,16 +32,19 @@ import com.example.myapplication.data.local.QuejaAnonima
 import com.example.myapplication.ui.theme.viewmodel.QuejaUiState
 import com.example.myapplication.ui.theme.viewmodel.QuejaViewModel
 
+// Pantalla para registrar quejas anónimas
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuejasAnonimasScreen(
-    tipo: String,
+    tipo: String,  // Tipo de queja (Alumbrado, Baches, etc.)
     navController: NavHostController
 ) {
+    // Inicializo el ViewModel y estados
     val viewModel: QuejaViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
     val focusManager = LocalFocusManager.current
 
+    // Variables para los campos del formulario
     var calle by remember { mutableStateOf("") }
     var cruzamientos by remember { mutableStateOf("") }
     var colonia by remember { mutableStateOf("") }
@@ -48,16 +53,17 @@ fun QuejasAnonimasScreen(
     var showError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
-    // Definimos los colores personalizados para los campos de texto
+    // Defino colores personalizados para los campos de texto
     val textFieldColors = OutlinedTextFieldDefaults.colors(
         focusedTextColor = Color.Black,
         unfocusedTextColor = Color.Black,
-        focusedLabelColor = Color(0xFFE53935),
+        focusedLabelColor = Color(0xFFE53935),  // Rojo para el label enfocado
         unfocusedLabelColor = Color.Gray,
-        cursorColor = Color(0xFFE53935),
-        focusedBorderColor = Color(0xFFE53935)
+        cursorColor = Color(0xFFE53935),        // Rojo para el cursor
+        focusedBorderColor = Color(0xFFE53935)  // Rojo para el borde enfocado
     )
 
+    // Efecto que se ejecuta cuando cambia el estado de la UI
     LaunchedEffect(uiState) {
         when (uiState) {
             is QuejaUiState.Error -> {
@@ -65,6 +71,7 @@ fun QuejasAnonimasScreen(
                 errorMessage = (uiState as QuejaUiState.Error).message
             }
             is QuejaUiState.QuejaInsertada -> {
+                // Si la queja se insertó correctamente, navego a inicio
                 navController.navigate("inicio") {
                     popUpTo("inicio") { inclusive = false }
                 }
@@ -73,6 +80,7 @@ fun QuejasAnonimasScreen(
         }
     }
 
+    // Contenedor principal
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -86,7 +94,7 @@ fun QuejasAnonimasScreen(
                 .blur(radius = 3.dp)
         )
 
-        // Capa de oscurecimiento sobre la imagen
+        // Capa oscura para mejorar legibilidad
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -100,12 +108,13 @@ fun QuejasAnonimasScreen(
                 )
         )
 
+        // Contenido principal
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
         ) {
-            // TopBar personalizada
+            // Barra superior con título y botón de regresar
             SmallTopAppBar(
                 title = {
                     Text(
@@ -130,7 +139,9 @@ fun QuejasAnonimasScreen(
                 )
             )
 
+            // Manejo diferentes estados de la UI
             when (uiState) {
+                // Mostrar indicador de carga
                 is QuejaUiState.Loading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -139,6 +150,7 @@ fun QuejasAnonimasScreen(
                         CircularProgressIndicator(color = Color.White)
                     }
                 }
+                // Mostrar formulario
                 else -> {
                     LazyColumn(
                         modifier = Modifier
@@ -147,6 +159,7 @@ fun QuejasAnonimasScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         item {
+                            // Tarjeta del formulario
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(16.dp),
@@ -160,6 +173,7 @@ fun QuejasAnonimasScreen(
                                         .padding(16.dp),
                                     verticalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {
+                                    // Título del formulario
                                     Text(
                                         text = "Registrar Nueva Queja",
                                         style = MaterialTheme.typography.titleMedium.copy(
@@ -168,6 +182,7 @@ fun QuejasAnonimasScreen(
                                         )
                                     )
 
+                                    // Campo para la calle
                                     OutlinedTextField(
                                         value = calle,
                                         onValueChange = { calle = it },
@@ -180,6 +195,7 @@ fun QuejasAnonimasScreen(
                                         )
                                     )
 
+                                    // Campo para los cruzamientos
                                     OutlinedTextField(
                                         value = cruzamientos,
                                         onValueChange = { cruzamientos = it },
@@ -192,6 +208,7 @@ fun QuejasAnonimasScreen(
                                         )
                                     )
 
+                                    // Campo para la colonia
                                     OutlinedTextField(
                                         value = colonia,
                                         onValueChange = { colonia = it },
@@ -204,6 +221,7 @@ fun QuejasAnonimasScreen(
                                         )
                                     )
 
+                                    // Campo para el tiempo de espera
                                     OutlinedTextField(
                                         value = tiempoEspera,
                                         onValueChange = { tiempoEspera = it },
@@ -216,6 +234,7 @@ fun QuejasAnonimasScreen(
                                         )
                                     )
 
+                                    // Campo para la descripción
                                     OutlinedTextField(
                                         value = descripcion,
                                         onValueChange = { descripcion = it },
@@ -229,14 +248,17 @@ fun QuejasAnonimasScreen(
                                         )
                                     )
 
+                                    // Botón para enviar la queja
                                     Button(
                                         onClick = {
+                                            // Verifico que todos los campos estén llenos
                                             if (calle.isNotBlank() &&
                                                 cruzamientos.isNotBlank() &&
                                                 colonia.isNotBlank() &&
                                                 tiempoEspera.isNotBlank() &&
                                                 descripcion.isNotBlank()
                                             ) {
+                                                // Creo y envío la nueva queja
                                                 val nuevaQueja = QuejaAnonima(
                                                     tipo = tipo,
                                                     calle = calle,
@@ -247,6 +269,7 @@ fun QuejasAnonimasScreen(
                                                 )
                                                 viewModel.insertarQueja(nuevaQueja)
                                             } else {
+                                                // Muestro error si faltan campos
                                                 showError = true
                                                 errorMessage = "Por favor, completa todos los campos"
                                             }
@@ -262,6 +285,7 @@ fun QuejasAnonimasScreen(
                                         Text("Enviar Queja")
                                     }
 
+                                    // Mensaje de error si hay alguno
                                     if (showError) {
                                         Text(
                                             text = errorMessage,

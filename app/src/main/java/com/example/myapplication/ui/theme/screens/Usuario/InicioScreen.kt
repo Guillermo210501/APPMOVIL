@@ -1,5 +1,7 @@
+// Este es el paquete donde está mi pantalla de inicio
 package com.example.myapplication.ui.theme.screens.Usuario
 
+// Importo todas las librerías necesarias para la interfaz de usuario
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,14 +26,16 @@ import com.example.myapplication.MainActivity
 import com.example.myapplication.R
 import com.google.firebase.auth.FirebaseAuth
 
+// Esta es la pantalla principal de inicio de la aplicación
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InicioScreen(navController: NavHostController, auth: FirebaseAuth) {
+    // Contenedor principal que ocupa toda la pantalla
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        // Imagen de fondo con efecto blur
+        // Pongo una imagen de fondo de Chetumal con efecto blur para que se vea más bonito
         Image(
             painter = painterResource(id = R.drawable.chetumal),
             contentDescription = "Fondo",
@@ -41,7 +45,7 @@ fun InicioScreen(navController: NavHostController, auth: FirebaseAuth) {
                 .blur(radius = 3.dp)
         )
 
-        // Capa de oscurecimiento sobre la imagen
+        // Agrego una capa oscura encima de la imagen para que se lea mejor el texto
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -55,18 +59,19 @@ fun InicioScreen(navController: NavHostController, auth: FirebaseAuth) {
                 )
         )
 
-        // Botones superiores
+        // Botones de la parte superior (Administrador y Anónimo)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .statusBarsPadding(),
+                .statusBarsPadding(),  // Esto es para que no se tape con la barra de estado
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            // Botón para ir a la vista de administrador
             Button(
                 onClick = { navController.navigate("admin") },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White.copy(alpha = 0.15f)
+                    containerColor = Color.White.copy(alpha = 0.15f)  // Botón semi-transparente
                 ),
                 shape = RoundedCornerShape(12.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
@@ -78,6 +83,7 @@ fun InicioScreen(navController: NavHostController, auth: FirebaseAuth) {
                 )
             }
 
+            // Botón para acceder como anónimo
             Button(
                 onClick = { navController.navigate(MainActivity.Routes.MainAnonima.route) },
                 colors = ButtonDefaults.buttonColors(
@@ -94,6 +100,7 @@ fun InicioScreen(navController: NavHostController, auth: FirebaseAuth) {
             }
         }
 
+        // Contenido principal centrado en la pantalla
         Column(
             modifier = Modifier
                 .align(Alignment.Center)
@@ -101,7 +108,7 @@ fun InicioScreen(navController: NavHostController, auth: FirebaseAuth) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Logo sin fondo blanco
+            // Logo de la aplicación
             Image(
                 painter = painterResource(id = R.drawable.ayudacomunidad),
                 contentDescription = "Logo de la aplicación",
@@ -109,6 +116,7 @@ fun InicioScreen(navController: NavHostController, auth: FirebaseAuth) {
                     .size(120.dp)
             )
 
+            // Título principal de la app
             Text(
                 text = "Ayuda a Mejorar a tu comunidad",
                 style = MaterialTheme.typography.headlineMedium.copy(
@@ -118,6 +126,7 @@ fun InicioScreen(navController: NavHostController, auth: FirebaseAuth) {
                 textAlign = TextAlign.Center
             )
 
+            // Subtítulo o slogan
             Text(
                 text = "La comunidad en tus manos, el cambio en tu voz",
                 style = MaterialTheme.typography.bodyLarge.copy(
@@ -126,19 +135,21 @@ fun InicioScreen(navController: NavHostController, auth: FirebaseAuth) {
                 textAlign = TextAlign.Center
             )
 
+            // Contenedor para los botones principales
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 32.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Botón de iniciar sesión (rojo para destacar)
                 Button(
                     onClick = { navController.navigate("login") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFE53935)
+                        containerColor = Color(0xFFE53935)  // Color rojo
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
@@ -151,6 +162,7 @@ fun InicioScreen(navController: NavHostController, auth: FirebaseAuth) {
                     )
                 }
 
+                // Botón de crear cuenta (con borde blanco)
                 OutlinedButton(
                     onClick = { navController.navigate("crear_cuenta") },
                     modifier = Modifier

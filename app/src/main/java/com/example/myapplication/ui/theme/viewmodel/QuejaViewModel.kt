@@ -11,14 +11,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+// ViewModel con inyección de dependencias utilizando Hilt
 @HiltViewModel
 class QuejaViewModel @Inject constructor(
     private val repository: QuejaRepository
 ) : ViewModel() {
 
+    // Estado de la interfaz de usuario
     private val _uiState = MutableStateFlow<QuejaUiState>(QuejaUiState.Loading)
     val uiState: StateFlow<QuejaUiState> = _uiState.asStateFlow()
 
+    // Lista de quejas
     private val _quejas = MutableStateFlow<List<QuejaAnonima>>(emptyList())
     val quejas: StateFlow<List<QuejaAnonima>> = _quejas.asStateFlow()
 
@@ -26,6 +29,7 @@ class QuejaViewModel @Inject constructor(
         cargarQuejas()
     }
 
+    // Cargar quejas desde el repositorio
     private fun cargarQuejas() {
         viewModelScope.launch {
             try {
@@ -39,6 +43,7 @@ class QuejaViewModel @Inject constructor(
         }
     }
 
+    // Insertar una nueva queja
     fun insertarQueja(queja: QuejaAnonima) {
         viewModelScope.launch {
             try {
@@ -51,6 +56,7 @@ class QuejaViewModel @Inject constructor(
     }
 }
 
+// Estados de la interfaz de usuario relacionados con las quejas
 sealed class QuejaUiState {
     object Loading : QuejaUiState()
     data class Success(val quejas: List<QuejaAnonima>) : QuejaUiState()

@@ -102,7 +102,7 @@ interface QuejaDao {
     @Query("SELECT * FROM quejas_anonimas WHERE estado = :estado ORDER BY fecha_creacion DESC")
     fun getQuejasByEstado(estado: String): Flow<List<QuejaAnonima>>
 
-    // Por si necesito limpiar toda la base de datos
+    // Por si necesito limpiar toda la base de datos 
     @Query("DELETE FROM quejas_anonimas")
     suspend fun deleteAllQuejas()
 

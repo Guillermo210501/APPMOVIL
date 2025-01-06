@@ -1,5 +1,7 @@
+// Este es el paquete donde está mi pantalla de login
 package com.example.myapplication.ui.theme.screens.Usuario
 
+// Importo todas las librerías necesarias para la interfaz y Firebase
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -30,9 +32,11 @@ import android.widget.Toast
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.layout.ContentScale
 
+// Esta es la pantalla de login de la aplicación
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavHostController, auth: FirebaseAuth) {
+    // Variables para controlar los campos del formulario
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var emailError by remember { mutableStateOf(false) }
@@ -41,10 +45,11 @@ fun LoginScreen(navController: NavHostController, auth: FirebaseAuth) {
 
     val context = LocalContext.current
 
+    // Contenedor principal
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Imagen de fondo con efecto blur
+        // Pongo la imagen de fondo de Chetumal con efecto blur
         Image(
             painter = painterResource(id = R.drawable.chetumal),
             contentDescription = "Fondo",
@@ -54,7 +59,7 @@ fun LoginScreen(navController: NavHostController, auth: FirebaseAuth) {
                 .blur(radius = 3.dp)
         )
 
-        // Capa de oscurecimiento sobre la imagen
+        // Agrego una capa oscura sobre la imagen para mejorar la legibilidad
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -68,13 +73,14 @@ fun LoginScreen(navController: NavHostController, auth: FirebaseAuth) {
                 )
         )
 
+        // Contenido principal centrado
         Column(
             modifier = Modifier
                 .align(Alignment.Center)
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo
+            // Logo de la aplicación
             Image(
                 painter = painterResource(id = R.drawable.ayudacomunidad),
                 contentDescription = "Logo de la aplicación",
@@ -84,7 +90,7 @@ fun LoginScreen(navController: NavHostController, auth: FirebaseAuth) {
                     .padding(bottom = 16.dp)
             )
 
-            // Títulos
+            // Títulos y subtítulos
             Text(
                 text = "Ayuda a Mejorar tu Comunidad",
                 style = MaterialTheme.typography.headlineMedium.copy(
@@ -111,11 +117,12 @@ fun LoginScreen(navController: NavHostController, auth: FirebaseAuth) {
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
-            // Email
+            // Campo de correo electrónico con validación
             OutlinedTextField(
                 value = email,
                 onValueChange = {
                     email = it
+                    // Valido el email cada vez que cambia
                     emailError = !isValidEmail(it)
                 },
                 label = { Text("Correo electrónico", color = Color.White) },
@@ -131,6 +138,7 @@ fun LoginScreen(navController: NavHostController, auth: FirebaseAuth) {
                 )
             )
 
+            // Mensaje de error para el email
             if (emailError) {
                 Text(
                     text = "Correo no válido. Debe contener '@' y terminar en '.com'",
@@ -140,7 +148,7 @@ fun LoginScreen(navController: NavHostController, auth: FirebaseAuth) {
                 )
             }
 
-            // Contraseña
+            // Campo de contraseña con opción de mostrar/ocultar
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -168,18 +176,21 @@ fun LoginScreen(navController: NavHostController, auth: FirebaseAuth) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botón de inicio de sesión
+            // Botón de inicio de sesión con estado de carga
             Button(
                 onClick = {
                     isLoading = true
+                    // Intento iniciar sesión con Firebase
                     auth.signInWithEmailAndPassword(email, password)
                         .addOnCompleteListener { task ->
                             isLoading = false
                             if (task.isSuccessful) {
+                                // Si el login es exitoso, navego a la pantalla principal
                                 navController.navigate("main") {
                                     popUpTo("login") { inclusive = true }
                                 }
                             } else {
+                                // Si hay error, muestro un mensaje según el tipo de error
                                 val message = when (task.exception) {
                                     is FirebaseAuthInvalidUserException -> "Usuario no registrado"
                                     is FirebaseAuthInvalidCredentialsException -> "Credenciales incorrectas"
@@ -189,13 +200,14 @@ fun LoginScreen(navController: NavHostController, auth: FirebaseAuth) {
                             }
                         }
                 },
+                // El botón se habilita solo si los campos están llenos y el email es válido
                 enabled = email.isNotBlank() && password.isNotBlank() && !emailError,
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFE53935)
+                    containerColor = Color(0xFFE53935)  // Color rojo
                 )
             ) {
                 if (isLoading) {
@@ -212,7 +224,7 @@ fun LoginScreen(navController: NavHostController, auth: FirebaseAuth) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botón de registro
+            // Botón para ir a la pantalla de registro
             TextButton(onClick = { navController.navigate("crear_cuenta") }) {
                 Text(
                     text = "¿No tienes cuenta? Regístrate",
@@ -223,6 +235,7 @@ fun LoginScreen(navController: NavHostController, auth: FirebaseAuth) {
     }
 }
 
+// Función para validar el formato del email
 fun isValidEmail(email: String): Boolean {
     val emailPattern = Regex("[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+")
     return emailPattern.matches(email)

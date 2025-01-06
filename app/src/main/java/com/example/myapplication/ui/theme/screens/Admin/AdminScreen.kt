@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.theme.screens.Admin
 
+// Importo todas las librerías necesarias para crear mi pantalla de administrador
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -31,6 +32,7 @@ import com.google.firebase.auth.FirebaseAuth
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminScreen(navController: NavHostController) {
+    // Aquí guardo las variables que voy a necesitar para el login
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
@@ -39,10 +41,11 @@ fun AdminScreen(navController: NavHostController) {
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
 
+    // Este Box es el contenedor principal de toda mi pantalla
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Imagen de fondo con efecto blur
+        // Pongo una imagen de fondo de Chetumal y le aplico un efecto blur para que se vea más bonito
         Image(
             painter = painterResource(id = R.drawable.chetumal),
             contentDescription = "Fondo",
@@ -52,27 +55,28 @@ fun AdminScreen(navController: NavHostController) {
                 .blur(radius = 3.dp)
         )
 
-        // Capa de oscurecimiento sobre la imagen
+        // Agrego una capa oscura encima de la imagen para que el texto se lea mejor
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color.Black.copy(alpha = 0.7f),
-                            Color.Black.copy(alpha = 0.5f)
+                            Color.Black.copy(alpha = 0.7f), // Más oscuro arriba
+                            Color.Black.copy(alpha = 0.5f)  // Menos oscuro abajo
                         )
                     )
                 )
         )
 
+        // Esta columna contiene todos los elementos de mi formulario de login
         Column(
             modifier = Modifier
                 .align(Alignment.Center)
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo
+            // Pongo el logo de la aplicación con bordes redondeados
             Image(
                 painter = painterResource(id = R.drawable.ayudacomunidad),
                 contentDescription = "Logo de la aplicación",
@@ -82,7 +86,7 @@ fun AdminScreen(navController: NavHostController) {
                     .padding(bottom = 16.dp)
             )
 
-            // Títulos
+            // Agrego los títulos de la pantalla con el estilo que quiero
             Text(
                 text = "Ayuda a Mejorar tu Comunidad",
                 style = MaterialTheme.typography.headlineMedium.copy(
@@ -109,7 +113,7 @@ fun AdminScreen(navController: NavHostController) {
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
-            // Email
+            // Campo para ingresar el correo, con borde blanco y texto blanco
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -125,7 +129,7 @@ fun AdminScreen(navController: NavHostController) {
                 )
             )
 
-            // Contraseña
+            // Campo para la contraseña con el botón para mostrar/ocultar
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -135,6 +139,7 @@ fun AdminScreen(navController: NavHostController) {
                     .padding(vertical = 8.dp),
                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
+                    // Botón para mostrar u ocultar la contraseña
                     IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                         Icon(
                             imageVector = if (isPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
@@ -151,6 +156,7 @@ fun AdminScreen(navController: NavHostController) {
                 )
             )
 
+            // Si hay un error, lo muestro aquí en rojo
             errorMessage?.let { error ->
                 Text(
                     text = error,
@@ -162,9 +168,10 @@ fun AdminScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botón de inicio de sesión
+            // Botón rojo para iniciar sesión
             Button(
                 onClick = {
+                    // Aquí verifico que los campos no estén vacíos y hago el login con Firebase
                     if (email.isNotBlank() && password.isNotBlank()) {
                         isLoading = true
                         errorMessage = null
@@ -172,6 +179,7 @@ fun AdminScreen(navController: NavHostController) {
                         auth.signInWithEmailAndPassword(email, password)
                             .addOnSuccessListener {
                                 isLoading = false
+                                // Si el login es exitoso, navego a la pantalla principal del admin
                                 navController.navigate(MainActivity.Routes.MainAdmin.route) {
                                     popUpTo(MainActivity.Routes.Admin.route) {
                                         inclusive = true
@@ -180,6 +188,7 @@ fun AdminScreen(navController: NavHostController) {
                             }
                             .addOnFailureListener { exception ->
                                 isLoading = false
+                                // Si hay error, muestro el mensaje apropiado según el tipo de error
                                 errorMessage = when {
                                     exception.message?.contains("password") == true ->
                                         "Contraseña incorrecta"
@@ -196,9 +205,10 @@ fun AdminScreen(navController: NavHostController) {
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFE53935)
+                    containerColor = Color(0xFFE53935) // Color rojo para el botón
                 )
             ) {
+                // Mientras se hace el login muestro un círculo de carga, si no, muestro el texto
                 if (isLoading) {
                     CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp)
                 } else {

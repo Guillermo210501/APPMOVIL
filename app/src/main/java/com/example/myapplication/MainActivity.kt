@@ -68,7 +68,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val auth = FirebaseAuth.getInstance() // Inicializa Firebase Auth
+        // Inicializa Firebase Auth
+        val auth = FirebaseAuth.getInstance()
 
         // Solicitar permisos de almacenamiento para versiones <= 28
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
@@ -82,7 +83,8 @@ class MainActivity : ComponentActivity() {
 
         // Configuración de Compose
         setContent {
-            val navController = rememberNavController() // Controlador de navegación
+            // Controlador de navegación
+            val navController = rememberNavController()
 
             MyApplicationTheme {
                 Surface(
@@ -101,7 +103,8 @@ class MainActivity : ComponentActivity() {
 
         NavHost(
             navController = navController,
-            startDestination = Routes.Inicio.route // Usamos el sealed class aquí
+            // Usamos el sealed class para definir la ruta de inicio
+            startDestination = Routes.Inicio.route
         ) {
             composable(Routes.Inicio.route) { InicioScreen(navController, auth) }
             composable(Routes.Login.route) { LoginScreen(navController, auth) }
@@ -114,6 +117,7 @@ class MainActivity : ComponentActivity() {
                 SeguimientoQuejasUserScreen(navController = navController, auth = auth)
             }
 
+            // Ruta para quejas anónimas con argumento "tipo"
             composable(
                 route = Routes.QuejasAnonimas.route,
                 arguments = listOf(navArgument("tipo") { type = NavType.StringType })
@@ -121,6 +125,7 @@ class MainActivity : ComponentActivity() {
                 val tipo = backStackEntry.arguments?.getString("tipo") ?: ""
                 QuejasAnonimasScreen(tipo = tipo, navController = navController)
             }
+            // Ruta para ver quejas de administrador con argumento "servicio"
             composable(
                 route = Routes.AdminVerQuejas.route,
                 arguments = listOf(navArgument("servicio") { type = NavType.StringType })
@@ -140,6 +145,7 @@ class MainActivity : ComponentActivity() {
                 SeguimientoQuejasAnonimas(navController = navController)
             }
 
+            // Ruta para quejas con argumento "tipo"
             composable(
                 route = Routes.Quejas.route,
                 arguments = listOf(navArgument("tipo") { type = NavType.StringType })

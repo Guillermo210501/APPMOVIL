@@ -1,3 +1,4 @@
+// Importo todas las librerías que necesito para el formulario de quejas
 package com.example.myapplication.ui.theme.screens.admin
 
 import android.widget.Toast
@@ -35,6 +36,7 @@ import com.example.myapplication.R
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 
+// Defino una clase para manejar los servicios y sus imágenes
 data class ServiceItem(
     val name: String,
     val imageResource: Int
@@ -43,13 +45,14 @@ data class ServiceItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuejasAdminScreen(navController: NavHostController) {
+    // Variables para controlar el estado de la pantalla y el formulario
     var selectedService by remember { mutableStateOf<String?>(null) }
     val focusManager = LocalFocusManager.current
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    // Estados para los campos del formulario
+    // Declaro todas las variables para los campos del formulario
     var nombre by remember { mutableStateOf("") }
     var apellidoPaterno by remember { mutableStateOf("") }
     var apellidoMaterno by remember { mutableStateOf("") }
@@ -62,20 +65,21 @@ fun QuejasAdminScreen(navController: NavHostController) {
     var numTelefonico by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
-    // Colores personalizados para los campos de texto
+    // Configuro los colores personalizados para los campos de texto
     val textFieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = Color.Black,
-        unfocusedTextColor = Color.Black,
-        focusedLabelColor = Color(0xFF1E3A8A),
-        unfocusedLabelColor = Color.Gray,
-        cursorColor = Color(0xFF1E3A8A),
-        focusedBorderColor = Color(0xFF1E3A8A)
+        focusedTextColor = Color.Black,          // Color del texto cuando está seleccionado
+        unfocusedTextColor = Color.Black,        // Color del texto normal
+        focusedLabelColor = Color(0xFF1E3A8A),   // Color de la etiqueta seleccionada
+        unfocusedLabelColor = Color.Gray,        // Color de la etiqueta normal
+        cursorColor = Color(0xFF1E3A8A),         // Color del cursor
+        focusedBorderColor = Color(0xFF1E3A8A)   // Color del borde cuando está seleccionado
     )
 
+    // Contenedor principal
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Imagen de fondo con blur
+        // Pongo la imagen de Chetumal de fondo con efecto blur
         Image(
             painter = painterResource(id = R.drawable.chetumal),
             contentDescription = null,
@@ -85,38 +89,40 @@ fun QuejasAdminScreen(navController: NavHostController) {
             contentScale = ContentScale.Crop
         )
 
-        // Capa de oscurecimiento sobre la imagen
+        // Agrego una capa oscura encima de la imagen para mejor contraste
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color.Black.copy(alpha = 0.7f),
-                            Color.Black.copy(alpha = 0.5f)
+                            Color.Black.copy(alpha = 0.7f),  // Más oscuro arriba
+                            Color.Black.copy(alpha = 0.5f)   // Menos oscuro abajo
                         )
                     )
                 )
         )
 
+        // Columna principal que contiene todo el contenido
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // Barra superior
+            // Barra superior con botón de regreso y título
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Botón para regresar o deseleccionar servicio
                 IconButton(
                     onClick = {
                         if (selectedService != null) {
-                            selectedService = null
+                            selectedService = null  // Si hay servicio seleccionado, lo quito
                         } else {
-                            navController.navigateUp()
+                            navController.navigateUp()  // Si no, regreso a la pantalla anterior
                         }
                     }
                 ) {
@@ -126,6 +132,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                         tint = Color.White
                     )
                 }
+                // Título que cambia según si hay servicio seleccionado
                 Text(
                     text = selectedService?.let { "Reportar Queja - $it" } ?: "Selecciona el Servicio",
                     style = MaterialTheme.typography.headlineMedium.copy(
@@ -136,7 +143,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                 )
             }
 
-            // Subtítulo con fondo
+            // Caja con instrucciones para el usuario
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -159,15 +166,18 @@ fun QuejasAdminScreen(navController: NavHostController) {
                 )
             }
 
+
+// Agrega un espacio vertical de 24dp
             Spacer(modifier = Modifier.height(24.dp))
 
             if (selectedService == null) {
-                // Lista de servicios
+                // Muestra la lista de servicios si no se ha seleccionado ninguno
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     item {
+                        // Define la lista de servicios con sus nombres e imágenes correspondientes
                         val services = listOf(
                             ServiceItem("Alumbrado", R.drawable.alumbrado),
                             ServiceItem("Alcantarillado", R.drawable.alcantarillado),
@@ -176,6 +186,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                             ServiceItem("Banquetas", R.drawable.banquetas)
                         )
 
+                        // Itera sobre la lista de servicios y crea una tarjeta para cada uno
                         services.forEach { service ->
                             Card(
                                 modifier = Modifier
@@ -188,12 +199,14 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                     containerColor = Color.White.copy(alpha = 0.7f)
                                 )
                             ) {
+                                // Muestra el nombre y la imagen del servicio en una fila
                                 Row(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .padding(horizontal = 16.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
+                                    // Crea un contenedor para la imagen del servicio con un fondo circular
                                     Box(
                                         modifier = Modifier
                                             .size(80.dp)
@@ -203,6 +216,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                             )
                                             .padding(4.dp)
                                     ) {
+                                        // Muestra la imagen del servicio dentro del contenedor circular
                                         Image(
                                             painter = painterResource(id = service.imageResource),
                                             contentDescription = service.name,
@@ -213,8 +227,10 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                         )
                                     }
 
+                                    // Agrega un espacio horizontal de 16dp entre la imagen y el texto
                                     Spacer(modifier = Modifier.width(16.dp))
 
+                                    // Muestra el nombre del servicio
                                     Text(
                                         text = service.name,
                                         style = MaterialTheme.typography.titleMedium.copy(
@@ -224,18 +240,19 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                     )
                                 }
                             }
+                            // Agrega un espacio vertical de 8dp entre cada tarjeta de servicio
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
                 }
             } else {
-                // Formulario de queja
+                // Muestra el formulario de queja si se ha seleccionado un servicio
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     item {
-                        // Imagen del servicio seleccionado
+                        // Muestra la imagen del servicio seleccionado
                         Image(
                             painter = painterResource(
                                 id = when (selectedService?.lowercase()) {
@@ -255,9 +272,10 @@ fun QuejasAdminScreen(navController: NavHostController) {
                             contentScale = ContentScale.Crop
                         )
 
+                        // Agrega un espacio vertical de 16dp
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Card para datos personales
+                        // Muestra una tarjeta para ingresar los datos personales
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(
@@ -269,6 +287,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                 modifier = Modifier.padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
+                                // Título de la sección de datos personales
                                 Text(
                                     "Datos Personales",
                                     style = MaterialTheme.typography.titleMedium.copy(
@@ -277,6 +296,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                     )
                                 )
 
+                                // Campo de texto para ingresar el nombre
                                 OutlinedTextField(
                                     value = nombre,
                                     onValueChange = { nombre = it },
@@ -289,6 +309,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                     )
                                 )
 
+                                // Campo de texto para ingresar el apellido paterno
                                 OutlinedTextField(
                                     value = apellidoPaterno,
                                     onValueChange = { apellidoPaterno = it },
@@ -301,6 +322,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                     )
                                 )
 
+                                // Campo de texto para ingresar el apellido materno
                                 OutlinedTextField(
                                     value = apellidoMaterno,
                                     onValueChange = { apellidoMaterno = it },
@@ -313,6 +335,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                     )
                                 )
 
+                                // Campo de texto para ingresar el correo electrónico
                                 OutlinedTextField(
                                     value = correo,
                                     onValueChange = { correo = it },
@@ -328,6 +351,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                     )
                                 )
 
+                                // Campo de texto para ingresar el número telefónico
                                 OutlinedTextField(
                                     value = numTelefonico,
                                     onValueChange = { numTelefonico = it },
@@ -345,9 +369,10 @@ fun QuejasAdminScreen(navController: NavHostController) {
                             }
                         }
 
+                        // Agrega un espacio vertical de 16dp
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Card para detalles de la queja
+                        // Muestra una tarjeta para ingresar los detalles de la queja
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(
@@ -359,6 +384,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                 modifier = Modifier.padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
+                                // Título de la sección de detalles de la queja
                                 Text(
                                     "Detalles de la Queja",
                                     style = MaterialTheme.typography.titleMedium.copy(
@@ -367,6 +393,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                     )
                                 )
 
+                                // Campo de texto para ingresar la colonia
                                 OutlinedTextField(
                                     value = colonia,
                                     onValueChange = { colonia = it },
@@ -379,6 +406,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                     )
                                 )
 
+                                // Campo de texto para ingresar la calle
                                 OutlinedTextField(
                                     value = calle,
                                     onValueChange = { calle = it },
@@ -391,6 +419,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                     )
                                 )
 
+                                // Campo de texto para ingresar los cruzamientos
                                 OutlinedTextField(
                                     value = cruzamientos,
                                     onValueChange = { cruzamientos = it },
@@ -403,6 +432,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                     )
                                 )
 
+                                // Campo de texto para ingresar el tiempo del problema
                                 OutlinedTextField(
                                     value = tiempoProblema,
                                     onValueChange = { tiempoProblema = it },
@@ -415,6 +445,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                     )
                                 )
 
+                                // Campo de texto de varias líneas para ingresar el motivo de la queja
                                 OutlinedTextField(
                                     value = motivoQueja,
                                     onValueChange = { motivoQueja = it },
@@ -430,25 +461,31 @@ fun QuejasAdminScreen(navController: NavHostController) {
                             }
                         }
 
+                        // Agrega un espacio vertical de 16dp
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Botón de enviar queja
+                        // Botón para enviar la queja
                         Button(
                             onClick = {
+                                // Verifica si todos los campos están completos
                                 if (nombre.isBlank() || apellidoPaterno.isBlank() || apellidoMaterno.isBlank() ||
                                     correo.isBlank() || colonia.isBlank() || calle.isBlank() ||
                                     cruzamientos.isBlank() || tiempoProblema.isBlank() || motivoQueja.isBlank() ||
                                     numTelefonico.isBlank()
                                 ) {
+                                    // Muestra un mensaje de error si algún campo está vacío
                                     scope.launch {
                                         snackbarHostState.showSnackbar("Por favor complete todos los campos")
                                     }
                                     return@Button
                                 }
 
+                                // Indica que se está enviando la queja
                                 isLoading = true
+                                // Obtiene una instancia de Firestore
                                 val db = FirebaseFirestore.getInstance()
 
+                                // Crea un objeto con los datos de la queja
                                 val queja = hashMapOf(
                                     "nombre" to "$nombre $apellidoPaterno $apellidoMaterno",
                                     "correo" to correo,
@@ -462,19 +499,21 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                     "tipo" to selectedService
                                 )
 
+                                // Guarda la queja en Firestore según el tipo de servicio seleccionado
                                 selectedService?.let { servicio ->
                                     db.collection("quejas")
                                         .document(servicio)
                                         .collection("quejasList")
                                         .add(queja)
                                         .addOnSuccessListener {
+                                            // Indica que se ha enviado la queja correctamente
                                             isLoading = false
                                             Toast.makeText(
                                                 context,
                                                 "Queja enviada con éxito",
                                                 Toast.LENGTH_SHORT
                                             ).show()
-                                            // Limpiar los campos después de enviar
+                                            // Limpia los campos después de enviar la queja
                                             nombre = ""
                                             apellidoPaterno = ""
                                             apellidoMaterno = ""
@@ -485,9 +524,10 @@ fun QuejasAdminScreen(navController: NavHostController) {
                                             cruzamientos = ""
                                             tiempoProblema = ""
                                             motivoQueja = ""
-                                            selectedService = null  // Regresa a la pantalla de selección de servicio
+                                            selectedService = null // Regresa a la pantalla de selección de servicio
                                         }
                                         .addOnFailureListener { e ->
+                                            // Muestra un mensaje de error si ocurre un problema al enviar la queja
                                             isLoading = false
                                             Toast.makeText(
                                                 context,
@@ -507,6 +547,7 @@ fun QuejasAdminScreen(navController: NavHostController) {
                             enabled = !isLoading
                         ) {
                             if (isLoading) {
+                                // Muestra un indicador de carga mientras se envía la queja
                                 CircularProgressIndicator(
                                     color = Color.White,
                                     modifier = Modifier.size(24.dp)

@@ -1,5 +1,7 @@
+// Este es el paquete donde está mi pantalla principal
 package com.example.myapplication.ui.theme.screens.Usuario
 
+// Importo todas las librerías necesarias para la interfaz
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,35 +35,41 @@ import com.example.myapplication.R
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
+// Esta es la pantalla principal que muestra las opciones de reportes
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(navController: NavHostController, auth: FirebaseAuth) {
+    // Estado para controlar el drawer (menú lateral)
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    // Detecto si el dispositivo está en modo oscuro
     val isDarkTheme = isSystemInDarkTheme()
 
+    // Creo el drawer (menú lateral) con navegación modal
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
                 modifier = Modifier
                     .background(
+                        // Defino el degradado del fondo según el tema
                         brush = Brush.verticalGradient(
                             colors = if (isDarkTheme) {
                                 listOf(
-                                    Color(0xFF1E3A8A),
-                                    Color(0xFF2563EB)
+                                    Color(0xFF1E3A8A),  // Azul oscuro
+                                    Color(0xFF2563EB)   // Azul más claro
                                 )
                             } else {
                                 listOf(
-                                    Color(0xFFFFFFFF),
-                                    Color(0xFFF5F5F5)
+                                    Color(0xFFFFFFFF),  // Blanco
+                                    Color(0xFFF5F5F5)   // Gris muy claro
                                 )
                             }
                         )
                     )
                     .fillMaxHeight()
             ) {
+                // Contenido del menú lateral
                 Column(
                     modifier = Modifier
                         .fillMaxHeight()
@@ -69,6 +77,7 @@ fun MainScreen(navController: NavHostController, auth: FirebaseAuth) {
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column {
+                        // Título del menú
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -83,6 +92,8 @@ fun MainScreen(navController: NavHostController, auth: FirebaseAuth) {
                                 modifier = Modifier.padding(bottom = 16.dp)
                             )
                         }
+
+                        // Línea divisoria
                         Divider(
                             color = if (isDarkTheme)
                                 Color.White.copy(alpha = 0.2f)
@@ -92,6 +103,7 @@ fun MainScreen(navController: NavHostController, auth: FirebaseAuth) {
                             modifier = Modifier.padding(bottom = 24.dp)
                         )
 
+                        // Opciones del menú
                         DrawerMenuItem(
                             label = "Quiénes somos",
                             icon = Icons.Default.Info,
@@ -114,6 +126,7 @@ fun MainScreen(navController: NavHostController, auth: FirebaseAuth) {
                             }
                         )
 
+                        // Opción de cerrar sesión
                         DrawerMenuItem(
                             label = "Cerrar sesión",
                             icon = Icons.Default.ExitToApp,
@@ -129,6 +142,7 @@ fun MainScreen(navController: NavHostController, auth: FirebaseAuth) {
                         )
                     }
 
+                    // Footer del menú
                     Text(
                         text = "© 2024 AyudaComunidad",
                         style = MaterialTheme.typography.bodySmall.copy(
@@ -145,10 +159,11 @@ fun MainScreen(navController: NavHostController, auth: FirebaseAuth) {
             }
         }
     ) {
+        // Contenido principal de la pantalla
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Imagen de fondo
+            // Imagen de fondo de Chetumal
             Image(
                 painter = painterResource(id = R.drawable.chetumal),
                 contentDescription = null,
@@ -156,6 +171,7 @@ fun MainScreen(navController: NavHostController, auth: FirebaseAuth) {
                 contentScale = ContentScale.Crop
             )
 
+            // Capa oscura sobre la imagen para mejorar legibilidad
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -176,7 +192,7 @@ fun MainScreen(navController: NavHostController, auth: FirebaseAuth) {
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Menú hamburguesa
+                // Botón de menú hamburguesa
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -193,7 +209,7 @@ fun MainScreen(navController: NavHostController, auth: FirebaseAuth) {
                     }
                 }
 
-                // Logo
+                // Logo de la aplicación
                 Image(
                     painter = painterResource(id = R.drawable.ayudacomunidad),
                     contentDescription = "Logo",
@@ -205,7 +221,7 @@ fun MainScreen(navController: NavHostController, auth: FirebaseAuth) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Título
+                // Título principal
                 Text(
                     text = "Ayuda a Mejorar tu Comunidad",
                     style = MaterialTheme.typography.headlineMedium.copy(
@@ -217,7 +233,7 @@ fun MainScreen(navController: NavHostController, auth: FirebaseAuth) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Subtítulo con fondo
+                // Subtítulo con fondo azul semi-transparente
                 Box(
                     modifier = Modifier
                         .background(
@@ -237,11 +253,12 @@ fun MainScreen(navController: NavHostController, auth: FirebaseAuth) {
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Lista de servicios
+                // Lista de servicios disponibles para reportar
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    // Lista de opciones con sus iconos
                     val options = listOf(
                         Pair("Alumbrado", R.drawable.alumbrado),
                         Pair("Alcantarillado", R.drawable.alcantarillado),
@@ -265,12 +282,14 @@ fun MainScreen(navController: NavHostController, auth: FirebaseAuth) {
     }
 }
 
+// Componente para cada elemento de la lista de servicios
 @Composable
 fun ServiceListItem(
     title: String,
     iconRes: Int,
     onClick: () -> Unit
 ) {
+    // Tarjeta semi-transparente con bordes redondeados
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -287,7 +306,7 @@ fun ServiceListItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            // Icono del servicio
+            // Contenedor circular para el icono
             Box(
                 modifier = Modifier
                     .size(80.dp)
@@ -315,7 +334,7 @@ fun ServiceListItem(
                 )
             )
 
-            // Flecha a la derecha
+            // Flecha indicadora
             Spacer(modifier = Modifier.weight(1f))
             Icon(
                 imageVector = Icons.Default.ArrowForward,
@@ -326,27 +345,30 @@ fun ServiceListItem(
     }
 }
 
+// Componente para cada elemento del menú lateral
 @Composable
 fun DrawerMenuItem(
     label: String,
     icon: ImageVector,
     onClick: () -> Unit
 ) {
+    // Detecto el tema actual
     val isDarkTheme = isSystemInDarkTheme()
 
-    // Colores adaptados según el tema
+    // Colores adaptados según el tema (claro/oscuro)
     val itemBackgroundColor = if (isDarkTheme) {
-        Color.White.copy(alpha = 0.1f)
+        Color.White.copy(alpha = 0.1f)  // Blanco semi-transparente en modo oscuro
     } else {
-        Color(0xFFF5F5F5) // Gris muy claro para modo claro
+        Color(0xFFF5F5F5)  // Gris muy claro en modo claro
     }
 
     val textAndIconColor = if (isDarkTheme) {
-        Color.White
+        Color.White  // Texto blanco en modo oscuro
     } else {
-        Color(0xFF1E3A8A) // Azul oscuro para modo claro
+        Color(0xFF1E3A8A)  // Azul oscuro en modo claro
     }
 
+    // Tarjeta para cada elemento del menú
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -363,6 +385,7 @@ fun DrawerMenuItem(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Icono del elemento
             Icon(
                 imageVector = icon,
                 contentDescription = label,
@@ -370,6 +393,7 @@ fun DrawerMenuItem(
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
+            // Texto del elemento
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge.copy(

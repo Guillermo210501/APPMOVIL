@@ -405,7 +405,6 @@ fun QuejaScreen(tipo: String, navController: NavHostController) {
                         "tipo" to tipo,
                         "fechaCreacion" to com.google.firebase.Timestamp.now()
                     )
-
                     db.collection("quejas")
                         .document(tipo)
                         .collection("quejasList")
